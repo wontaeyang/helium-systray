@@ -10,7 +10,7 @@ go build
 ```
 
 ### Configuration
-Helium systray requires a JSON config file at `~/Documents/helium-systray.json`. This can be adjusted by chaning `configFileName` variable for a new config location.
+Helium systray requires a JSON config file at `~/Documents/helium-systray.json`. This can be adjusted by changing `configFileName` variable for a new config location.
 
 ```
 {
