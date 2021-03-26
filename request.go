@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	"github.com/getlantern/systray"
 )
 
 func requestGet(url string, model interface{}) error {
@@ -26,41 +24,24 @@ func requestGet(url string, model interface{}) error {
 	return json.Unmarshal(rawBody, model)
 }
 
-func getAccountHotspots(address string) (hotspotList, error) {
-	list := hotspotList{}
+func getAccountHotspots(address string) (hotspotsResponse, error) {
 	path := fmt.Sprintf("https://api.helium.io/v1/accounts/%s/hotspots", address)
-
-	var resp accountHotspotsResponse
+	var resp hotspotsResponse
 	err := requestGet(path, &resp)
-	if err != nil {
-		return list, err
-	}
-
-	for _, hs := range resp.Data {
-		list[hs.Name] = hotspot{
-			Name:     hs.Name,
-			Status:   hs.Status.Online,
-			Address:  hs.Address,
-			MenuItem: systray.AddMenuItem(hs.Name, hs.Status.Online),
-		}
-	}
-
-	return list, nil
+	return resp, err
 }
 
-func getHotspotRewardSum(address string) (float64, error) {
+func getHotspotRewards(address string) (rewardsResponse, error) {
+	// /rewards/sum?min_time=-60 day&max_time=2021-03-26T06:10:12.251Z&bucket=day
 	now := time.Now()
 	path := fmt.Sprintf("https://api.helium.io/v1/hotspots/%s/rewards/sum?", address)
 	query := url.Values{
-		"min_time": {now.Add(-24 * time.Hour).Format(time.RFC3339)},
 		"max_time": {now.Format(time.RFC3339)},
+		"min_time": {"-60 day"},
+		"bucket":   {"day"},
 	}.Encode()
 
-	var resp hotspotRewardSummaryResponse
+	var resp rewardsResponse
 	err := requestGet(path+query, &resp)
-	if err != nil {
-		return 0, err
-	}
-
-	return resp.Data.Total, nil
+	return resp, err
 }
