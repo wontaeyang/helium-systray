@@ -120,6 +120,7 @@ func onReady() {
 			// reset values
 			total = 0.0
 			skipHotspotRefresh = false
+			hsSort = []sortOrder{}
 
 			// sleep until next refresh
 			time.Sleep(time.Duration(config.RefreshMinutes) * time.Minute)
