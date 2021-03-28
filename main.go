@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/getlantern/systray"
+	"github.com/wontaeyang/helium-systray/icon"
 )
 
 const configFileName = "/Documents/helium-systray.json"
@@ -104,11 +105,12 @@ func onReady() {
 			// update menu items for each ordered hotspots
 			for i, order := range hsSort {
 				hsStatus := hsMap[order.Name].Status.Online
+				rToday, rDiff := rewardSummary(hsRewards[order.Name])
+				setStatus(hsMenuItems[i].MenuItem, hsStatus, rDiff)
 				hsMenuItems[i].MenuItem.SetTitle(
 					fmt.Sprintf(
-						"%s %s - %s",
-						statusToEmoji(hsStatus),
-						rewardSummary(hsRewards[order.Name]),
+						"%s - %s",
+						floatToString(rToday),
 						order.Name,
 					),
 				)
@@ -179,21 +181,33 @@ func floatToString(val float64) string {
 	return fmt.Sprintf("%.2f", val)
 }
 
-func rewardSummary(summary []reward) string {
-	diff := summary[0].Total - summary[1].Total
-	return fmt.Sprintf("%s %s", diffEmoji(diff), floatToString(summary[0].Total))
+func rewardSummary(summary []reward) (today float64, diff float64) {
+	switch len(summary) {
+	case 0:
+		return 0, 0
+	case 1:
+		return summary[0].Total, 0
+	default:
+		diff := summary[0].Total - summary[1].Total
+		return summary[0].Total, diff
+	}
 }
 
-func diffEmoji(diff float64) string {
-	if diff > 0 {
-		return "⬆"
+func setStatus(mi *systray.MenuItem, status string, diff float64) {
+	var currentIcon []byte
+	switch {
+	case status == "online" && diff == 0:
+		currentIcon = icon.StatusPos
+	case status == "online" && diff > 0:
+		currentIcon = icon.StatusPosUp
+	case status == "online" && diff < 0:
+		currentIcon = icon.StatusPosDown
+	case status != "online" && diff == 0:
+		currentIcon = icon.StatusErr
+	case status != "online" && diff > 0:
+		currentIcon = icon.StatusErrUp
+	case status != "online" && diff < 0:
+		currentIcon = icon.StatusErrDown
 	}
-	return "⬇"
-}
-
-func statusToEmoji(status string) string {
-	if status == "online" {
-		return "🟢"
-	}
-	return "🔴"
+	mi.SetIcon(currentIcon)
 }
