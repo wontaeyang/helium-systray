@@ -20,6 +20,11 @@ type appSettings struct {
 
 type hotspotMenuItem struct {
 	MenuItem *systray.MenuItem
+	Status   *systray.MenuItem
+	Scale    *systray.MenuItem
+	R24H     *systray.MenuItem
+	R7D      *systray.MenuItem
+	R30D     *systray.MenuItem
 }
 
 func main() {
@@ -156,7 +161,13 @@ func loadAppSettings(path string) appSettings {
 }
 
 func newHotspotMenuItem() hotspotMenuItem {
+	item := systray.AddMenuItem("", "")
 	return hotspotMenuItem{
-		MenuItem: systray.AddMenuItem("", ""),
+		MenuItem: item,
+		Status:   item.AddSubMenuItem("", ""),
+		Scale:    item.AddSubMenuItem("", ""),
+		R24H:     item.AddSubMenuItem("", ""),
+		R7D:      item.AddSubMenuItem("", ""),
+		R30D:     item.AddSubMenuItem("", ""),
 	}
 }

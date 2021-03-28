@@ -6,3 +6,6 @@ icons:
 	2goarray StatusErr icon < ./icon/status_err.png > ./icon/icon_status_err.go
 	2goarray StatusErrUp icon < ./icon/status_err_up.png > ./icon/icon_status_err_up.go
 	2goarray StatusErrDown icon < ./icon/status_err_down.png > ./icon/icon_status_err_down.go
+
+build:
+	go build -o ./heliumsystray.app/Contents/MacOs/heliumsystray
