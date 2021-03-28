@@ -45,6 +45,12 @@ type reward struct {
 	Avg       float64   `json:"avg"`
 }
 
+type price struct {
+	Timestamp time.Time `json:"timestamp"`
+	Price     int       `json:"price"`
+	Block     int       `json:"block"`
+}
+
 type hotspotsResponse struct {
 	Data []hotspot `json:"data"`
 }
@@ -56,4 +62,8 @@ type rewardsResponse struct {
 		Bucket  string    `json:"bucket"`
 	} `json:"meta"`
 	Data []reward `json:"data"`
+}
+
+type priceResponse struct {
+	Data price `json:"data"`
 }

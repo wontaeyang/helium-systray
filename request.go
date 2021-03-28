@@ -45,3 +45,10 @@ func getHotspotRewards(address string) (rewardsResponse, error) {
 	err := requestGet(path+query, &resp)
 	return resp, err
 }
+
+func getPrice() (priceResponse, error) {
+	path := "https://api.helium.io/v1/oracle/prices/current"
+	var resp priceResponse
+	err := requestGet(path, &resp)
+	return resp, err
+}
