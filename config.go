@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sort"
 
 	"github.com/getlantern/systray"
@@ -80,17 +81,17 @@ func (cfg *config) UpdateView() {
 
 		r24HRow := cfg.HsMenuItems[i].R24H
 		setStatus(r24HRow, onlineStatus, d24H)
-		r24HRow.SetTitle(fmt.Sprintf("24H - %s / %s", cfg.rewardToString(r24H), diffPercent(d24H, p24H)))
+		r24HRow.SetTitle(fmt.Sprintf("24H - %s %s", cfg.rewardToString(r24H), diffPercent(d24H, p24H)))
 
 		r7DRow := cfg.HsMenuItems[i].R7D
 		r7D, p7D, d7D := cfg.RewardDiff(order.Name, 7)
 		setStatus(r7DRow, onlineStatus, d7D)
-		r7DRow.SetTitle(fmt.Sprintf("7D - %s / %s", cfg.rewardToString(r7D), diffPercent(d7D, p7D)))
+		r7DRow.SetTitle(fmt.Sprintf("07D - %s %s", cfg.rewardToString(r7D), diffPercent(d7D, p7D)))
 
 		r30DRow := cfg.HsMenuItems[i].R30D
 		r30D, p30D, d30D := cfg.RewardDiff(order.Name, 30)
 		setStatus(r30DRow, onlineStatus, d30D)
-		r30DRow.SetTitle(fmt.Sprintf("30D - %s / %s", cfg.rewardToString(r30D), diffPercent(d30D, p30D)))
+		r30DRow.SetTitle(fmt.Sprintf("30D - %s %s", cfg.rewardToString(r30D), diffPercent(d30D, p30D)))
 	}
 
 	// update title with total
@@ -141,10 +142,16 @@ func floatToString(val float64) string {
 func diffPercent(diff float64, prev float64) string {
 	percent := (diff / prev) * 100
 	var prefix string
-	if percent > 0 {
-		prefix = "+"
-	} else {
-		prefix = ""
+	switch {
+	case math.IsInf(percent, 0):
+		return ""
+	case math.IsNaN(percent):
+		return ""
+	case percent > 0:
+		prefix = "/ +"
+	default:
+		prefix = "/ "
 	}
+
 	return fmt.Sprintf("%s%s%%", prefix, floatToString(percent))
 }

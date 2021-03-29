@@ -53,7 +53,7 @@ func onReady() {
 	// populate hotspot data and menu items
 	for _, hs := range hotspotsResp.Data {
 		cfg.HsMap[hs.Name] = hs
-		cfg.HsMenuItems = append(cfg.HsMenuItems, newHotspotMenuItem())
+		cfg.HsMenuItems = append(cfg.HsMenuItems, newHotspotMenuItem(hs.Name))
 	}
 
 	// set flag for skipping first refresh
@@ -91,8 +91,6 @@ func onReady() {
 				for _, hs := range hotspotsResp.Data {
 					cfg.HsMap[hs.Name] = hs
 				}
-
-				// TODO: reconcile menu items here
 			}
 
 			// get rewards for each hotspot
@@ -160,14 +158,14 @@ func loadAppSettings(path string) appSettings {
 	return as
 }
 
-func newHotspotMenuItem() hotspotMenuItem {
-	item := systray.AddMenuItem("", "")
+func newHotspotMenuItem(name string) hotspotMenuItem {
+	item := systray.AddMenuItem(fmt.Sprintf("Loading %v", name), "")
 	return hotspotMenuItem{
 		MenuItem: item,
-		Status:   item.AddSubMenuItem("", ""),
-		Scale:    item.AddSubMenuItem("", ""),
-		R24H:     item.AddSubMenuItem("", ""),
-		R7D:      item.AddSubMenuItem("", ""),
-		R30D:     item.AddSubMenuItem("", ""),
+		Status:   item.AddSubMenuItem("Loading...", "Loading data..."),
+		Scale:    item.AddSubMenuItem("Loading...", "Loading data..."),
+		R24H:     item.AddSubMenuItem("Loading...", "Loading data..."),
+		R7D:      item.AddSubMenuItem("Loading...", "Loading data..."),
+		R30D:     item.AddSubMenuItem("Loading...", "Loading data..."),
 	}
 }
