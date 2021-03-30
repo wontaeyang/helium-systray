@@ -1,6 +1,8 @@
 # helium-systray
 Menu bar app for tracking Helium HNT earnings
 
+![app preview](assets/app.png?raw=true)
+
 ### Build and running
 Use following  commands to build and run the app in the project folder
 
@@ -14,8 +16,7 @@ Helium systray requires a JSON config file at `~/Documents/helium-systray.json`.
 
 ```
 {
-  "refresh_minutes": 10,
-  "lookback_hours": 24,
+  "refresh_minutes": 15,
   "account_address": "{{ your helium account address here }}"
 }
 ```

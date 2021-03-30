@@ -57,9 +57,9 @@ func (cfg *config) rewardToString(val float64) string {
 	var result string
 	if cfg.ConvertToDollars {
 		dollars := val * (float64(cfg.Price) / 100000000)
-		result = "$" + floatToString(dollars)
+		result = fmt.Sprintf("%s USD", floatToString(dollars))
 	} else {
-		result = floatToString(val)
+		result = fmt.Sprintf("%s HNT", floatToString(val))
 	}
 	return result
 }
@@ -95,7 +95,7 @@ func (cfg *config) UpdateView() {
 	}
 
 	// update title with total
-	systray.SetTitle(fmt.Sprintf("HNT earned: %s", cfg.rewardToString(cfg.Total)))
+	systray.SetTitle(fmt.Sprintf("Hotspot rewards: %s", cfg.rewardToString(cfg.Total)))
 }
 
 func (cfg *config) ClearPreviousData() {
