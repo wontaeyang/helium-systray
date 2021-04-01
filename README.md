@@ -1,5 +1,5 @@
 # helium-systray
-Menu bar app for tracking Helium HNT earnings
+Menu bar app for tracking Helium account hotspot rewards
 
 ![app preview](assets/app.png?raw=true)
 
