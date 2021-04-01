@@ -23,7 +23,7 @@ type hotspotMenuItem struct {
 	Status   *systray.MenuItem
 	Scale    *systray.MenuItem
 	R24H     *systray.MenuItem
-	R7D      *systray.MenuItem
+	R07D     *systray.MenuItem
 	R30D     *systray.MenuItem
 }
 
@@ -33,8 +33,12 @@ func main() {
 
 func onReady() {
 	// load config file
-	appSettings := loadAppSettings(appSettingsPath)
-	fmt.Printf("Config loaded: %+v", appSettings)
+	appSettings, err := loadAppSettings(appSettingsPath)
+	if err != nil {
+		systray.SetTitle("Error loading Helium systray config...")
+		time.Sleep(3 * time.Second)
+		log.Fatalln(err)
+	}
 
 	// set loading status
 	systray.SetTitle("Calculating HNT summary...")
@@ -133,29 +137,31 @@ func onExit() {
 	// no-op
 }
 
-func loadAppSettings(path string) appSettings {
+func loadAppSettings(path string) (appSettings, error) {
+	var as appSettings
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatalln(err)
+		return as, err
 	}
 
 	file, err := os.Open(homeDir + path)
-	if err != nil {
-		log.Fatalln(err)
-	}
 	defer file.Close()
+	if err != nil {
+		return as, err
+	}
 
 	rawSettings, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Fatalln(err)
+		return as, err
 	}
 
-	var as appSettings
 	err = json.Unmarshal(rawSettings, &as)
 	if err != nil {
-		log.Fatalln(err)
+		return as, err
 	}
-	return as
+
+	return as, nil
 }
 
 func newHotspotMenuItem(name string) hotspotMenuItem {
@@ -165,7 +171,7 @@ func newHotspotMenuItem(name string) hotspotMenuItem {
 		Status:   item.AddSubMenuItem("Loading...", "Loading data..."),
 		Scale:    item.AddSubMenuItem("Loading...", "Loading data..."),
 		R24H:     item.AddSubMenuItem("Loading...", "Loading data..."),
-		R7D:      item.AddSubMenuItem("Loading...", "Loading data..."),
+		R07D:     item.AddSubMenuItem("Loading...", "Loading data..."),
 		R30D:     item.AddSubMenuItem("Loading...", "Loading data..."),
 	}
 }

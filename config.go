@@ -83,10 +83,10 @@ func (cfg *config) UpdateView() {
 		setStatus(r24HRow, onlineStatus, d24H)
 		r24HRow.SetTitle(fmt.Sprintf("24H - %s %s", cfg.rewardToString(r24H), diffPercent(d24H, p24H)))
 
-		r7DRow := cfg.HsMenuItems[i].R7D
-		r7D, p7D, d7D := cfg.RewardDiff(order.Name, 7)
-		setStatus(r7DRow, onlineStatus, d7D)
-		r7DRow.SetTitle(fmt.Sprintf("07D - %s %s", cfg.rewardToString(r7D), diffPercent(d7D, p7D)))
+		r07dRow := cfg.HsMenuItems[i].R07D
+		r07d, p07D, d07D := cfg.RewardDiff(order.Name, 7)
+		setStatus(r07dRow, onlineStatus, d07D)
+		r07dRow.SetTitle(fmt.Sprintf("07D - %s %s", cfg.rewardToString(r07d), diffPercent(d07D, p07D)))
 
 		r30DRow := cfg.HsMenuItems[i].R30D
 		r30D, p30D, d30D := cfg.RewardDiff(order.Name, 30)
