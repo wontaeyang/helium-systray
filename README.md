@@ -1,14 +1,20 @@
-# helium-systray
-Menu bar app for tracking Helium account hotspot rewards
+# Helium Systray
+A menu bar app for tracking Helium hotspot earnings. Powered by [systray](https://github.com/getlantern/systray).
 
 ![app preview](assets/app.png?raw=true)
+
+### Env setup
+- [Install Go](https://golang.org/doc/install)
+- [Install 2goarray](https://github.com/cratonica/2goarray)
+```sh
+go get github.com/cratonica/2goarray
+```
 
 ### Build and running
 Use following  commands to build and run the app in the project folder
 
 ```
-go build
-./helium-systray
+make build
 ```
 
 ### Configuration

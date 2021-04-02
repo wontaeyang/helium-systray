@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
+	"runtime"
 	"time"
 
 	"github.com/getlantern/systray"
@@ -68,6 +70,7 @@ func onReady() {
 	pref := systray.AddMenuItem("Preferences...", "Adjust preferences")
 	displayHNT := pref.AddSubMenuItem("display rewards in HNT", "display hotspot rewards in HNT")
 	displayDollars := pref.AddSubMenuItem("display rewards in dollars", "display hotspot rewards in USD")
+	editConfig := pref.AddSubMenuItem("Edit config...", "Edit the JSON config")
 	mQuit := systray.AddMenuItem("Quit", "Quits this app")
 
 	// data refresh routine
@@ -125,6 +128,28 @@ func onReady() {
 			case <-displayDollars.ClickedCh:
 				cfg.ConvertToDollars = true
 				cfg.UpdateView()
+			case <-editConfig.ClickedCh:
+
+				app := ""
+				filepath := ""
+
+				if runtime.GOOS == "windows" {
+					app = "explorer"
+					filepath = "file:///" + appSettingsFullPath()
+				} else {
+					app = "open"
+					filepath = appSettingsFullPath()
+				}
+
+				cmd := exec.Command(app, filepath)
+				stdout, err := cmd.Output()
+
+				if err != nil {
+						fmt.Println(err.Error())
+						return
+				}
+
+				fmt.Print(string(stdout))	
 			case <-mQuit.ClickedCh:
 				systray.Quit()
 				return
@@ -135,6 +160,15 @@ func onReady() {
 
 func onExit() {
 	// no-op
+}
+
+func appSettingsFullPath() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "home dir not found"
+	}
+
+	return homeDir + appSettingsPath
 }
 
 func loadAppSettings(path string) (appSettings, error) {

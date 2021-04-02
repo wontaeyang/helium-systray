@@ -9,3 +9,4 @@ icons:
 
 build:
 	go build -o ./heliumsystray.app/Contents/MacOs/heliumsystray
+	go build -ldflags "-H=windowsgui" -o helium-systray.exe
