@@ -67,7 +67,7 @@ func onReady() {
 	systray.AddSeparator()
 	pref := systray.AddMenuItem("Preferences...", "Adjust preferences")
 	displayHNT := pref.AddSubMenuItem("display rewards in HNT", "display hotspot rewards in HNT")
-	displayDollars := pref.AddSubMenuItem("display rewards in dollars", "display hotspot rewards in dollars")
+	displayDollars := pref.AddSubMenuItem("display rewards in dollars", "display hotspot rewards in USD")
 	mQuit := systray.AddMenuItem("Quit", "Quits this app")
 
 	// data refresh routine
