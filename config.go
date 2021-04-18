@@ -170,7 +170,6 @@ func (cfg *config) UpdateView() {
 }
 
 func (cfg *config) ClearPreviousData() {
-	cfg.SkipHotspotRefresh = false
 	cfg.Total = 0.0
 	cfg.HsSort = []sortOrder{}
 }

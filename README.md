@@ -27,3 +27,6 @@ Helium systray requires a JSON config file at `~/Documents/helium-systray.json`.
   "hotspot_addresses": ["{{ individual hotspot addresses here }}"],
 }
 ```
+
+### Credits
+Helium Systray icons are designed by [@chadpugh](https://github.com/chadpugh) ( [chadpugh.com](http://chadpugh.com) )

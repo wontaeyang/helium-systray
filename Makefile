@@ -8,6 +8,7 @@ icons:
 	2goarray StatusErrUp icon < ./icon/status_err_up.png > ./icon/icon_status_err_up.go
 	2goarray StatusErrDown icon < ./icon/status_err_down.png > ./icon/icon_status_err_down.go
 
-build:
+build-mac:
 	go build -o ./heliumsystray.app/Contents/MacOs/heliumsystray
+build-win:
 	go build -ldflags "-H=windowsgui" -o helium-systray.exe

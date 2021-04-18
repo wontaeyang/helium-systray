@@ -6,5 +6,7 @@
       <string>True</string>
       <key>LSUIElement</key>
       <string>1</string>
+      <key>CFBundleIconFile</key>
+	  <string>HeliumSystray</string>
     </dict>
 </plist>

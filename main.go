@@ -64,12 +64,13 @@ func onReady() {
 	// Data refresh routine
 	go func() {
 		for {
+			cfg.ClearPreviousData()
 			cfg.GetHNTPrice()
 			cfg.RefreshAllHotspots()
 			cfg.GetHotspotRewards()
 			cfg.SortHotspotsByReward()
 			cfg.UpdateView()
-			cfg.ClearPreviousData()
+			cfg.SkipHotspotRefresh = false
 			time.Sleep(time.Duration(cfg.RefreshMinutes) * time.Minute)
 		}
 	}()
