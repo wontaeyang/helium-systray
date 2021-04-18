@@ -31,6 +31,13 @@ func getAccountHotspots(address string) (hotspotsResponse, error) {
 	return resp, err
 }
 
+func getHotspot(address string) (hotspotResponse, error) {
+	path := fmt.Sprintf("https://api.helium.io/v1/hotspots/%s", address)
+	var resp hotspotResponse
+	err := requestGet(path, &resp)
+	return resp, err
+}
+
 func getHotspotRewards(address string) (rewardsResponse, error) {
 	// /rewards/sum?min_time=-60 day&max_time=2021-03-26T06:10:12.251Z&bucket=day
 	now := time.Now()

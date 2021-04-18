@@ -11,13 +11,15 @@ import (
 	"time"
 
 	"github.com/getlantern/systray"
+	"github.com/wontaeyang/helium-systray/icon"
 )
 
 const appSettingsPath = "/Documents/helium-systray.json"
 
 type appSettings struct {
-	RefreshMinutes int    `json:"refresh_minutes"`
-	AccountAddress string `json:"account_address"`
+	RefreshMinutes   int      `json:"refresh_minutes"`
+	AccountAddresses []string `json:"account_addresses"`
+	HotspotAddresses []string `json:"hotspot_addresses"`
 }
 
 type hotspotMenuItem struct {
@@ -34,86 +36,40 @@ func main() {
 }
 
 func onReady() {
-	// load config file
+	// Load config file
 	appSettings, err := loadAppSettings(appSettingsPath)
 	if err != nil {
-		systray.SetTitle("Error loading Helium systray config...")
-		time.Sleep(3 * time.Second)
-		log.Fatalln(err)
+		handleError(err, "Config error")
 	}
 
-	// set loading status
-	systray.SetTitle("Calculating HNT summary...")
-	systray.SetTooltip("HNT summary for your Helium hotspots in past 24 hours")
+	fmt.Printf("app settings loaded: %+v \n", appSettings)
 
-	// setup initial config values
+	// Set loading status
+	systray.SetIcon(icon.AppIconSmol)
+	setAppTitle("Loading summary...")
+
+	// Setup initial config values
 	cfg := newConfig(appSettings)
-
-	// get initial list of hotspots
-	hotspotsResp, err := getAccountHotspots(cfg.AccountAddress)
-	if err != nil {
-		systray.SetTitle("Error fetching hotspots")
-		fmt.Println(err)
-	}
-
-	// populate hotspot data and menu items
-	for _, hs := range hotspotsResp.Data {
-		cfg.HsMap[hs.Name] = hs
-		cfg.HsMenuItems = append(cfg.HsMenuItems, newHotspotMenuItem(hs.Name))
-	}
-
-	// set flag for skipping first refresh
+	cfg.FetchAllHotspots()
 	cfg.SkipHotspotRefresh = true
 
-	// add quit button at the end because order matters
+	// Setup preferences and quit menu items
 	systray.AddSeparator()
 	pref := systray.AddMenuItem("Preferences...", "Adjust preferences")
-	displayHNT := pref.AddSubMenuItem("display rewards in HNT", "display hotspot rewards in HNT")
-	displayDollars := pref.AddSubMenuItem("display rewards in dollars", "display hotspot rewards in USD")
+	displayHNT := pref.AddSubMenuItem("display rewards in HNT", "display rewards in HNT")
+	displayDollars := pref.AddSubMenuItem("display rewards in USD", "display rewards in USD")
 	editConfig := pref.AddSubMenuItem("Edit config...", "Edit the JSON config")
 	mQuit := systray.AddMenuItem("Quit", "Quits this app")
 
-	// data refresh routine
+	// Data refresh routine
 	go func() {
 		for {
-			// clear previous sort/total data
-			cfg.ClearPreviousData()
-
-			// get new price
-			priceResp, err := getPrice()
-			if err != nil {
-				systray.SetTitle("Error fetching HNT price")
-				fmt.Println(err)
-			}
-			cfg.Price = priceResp.Data.Price
-
-			// update hotspots data
-			if !cfg.SkipHotspotRefresh {
-				hotspotsResp, err := getAccountHotspots(appSettings.AccountAddress)
-				if err != nil {
-					systray.SetTitle("Error fetching hotspots")
-					fmt.Println(err)
-				}
-
-				for _, hs := range hotspotsResp.Data {
-					cfg.HsMap[hs.Name] = hs
-				}
-			}
-
-			// get rewards for each hotspot
-			for name, hs := range cfg.HsMap {
-				// track rewards
-				rewardsResp, _ := getHotspotRewards(hs.Address)
-				cfg.HsRewards[name] = rewardsResp.Data
-
-				// track sorting order and today's reward
-				reward := cfg.RewardOn(name, 0)
-				cfg.HsSort = append(cfg.HsSort, sortOrder{Name: name, Reward: reward})
-				cfg.Total += reward
-			}
-
+			cfg.GetHNTPrice()
+			cfg.RefreshAllHotspots()
+			cfg.GetHotspotRewards()
 			cfg.SortHotspotsByReward()
 			cfg.UpdateView()
+			cfg.ClearPreviousData()
 			time.Sleep(time.Duration(cfg.RefreshMinutes) * time.Minute)
 		}
 	}()
@@ -145,11 +101,11 @@ func onReady() {
 				stdout, err := cmd.Output()
 
 				if err != nil {
-						fmt.Println(err.Error())
-						return
+					fmt.Println(err.Error())
+					return
 				}
 
-				fmt.Print(string(stdout))	
+				fmt.Print(string(stdout))
 			case <-mQuit.ClickedCh:
 				systray.Quit()
 				return
@@ -208,4 +164,19 @@ func newHotspotMenuItem(name string) hotspotMenuItem {
 		R07D:     item.AddSubMenuItem("Loading...", "Loading data..."),
 		R30D:     item.AddSubMenuItem("Loading...", "Loading data..."),
 	}
+}
+
+func setAppTitle(msg string) {
+	systray.SetTitle(msg)
+}
+
+func handleSoftError(err error, msg string) {
+	systray.SetTitle(msg)
+	fmt.Println(err)
+}
+
+func handleError(err error, msg string) {
+	systray.SetTitle(msg)
+	time.Sleep(3 * time.Second)
+	log.Fatalln(err)
 }

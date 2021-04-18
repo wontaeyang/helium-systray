@@ -51,6 +51,10 @@ type price struct {
 	Block     int       `json:"block"`
 }
 
+type hotspotResponse struct {
+	Data hotspot `json:"data"`
+}
+
 type hotspotsResponse struct {
 	Data []hotspot `json:"data"`
 }

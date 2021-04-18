@@ -1,5 +1,6 @@
 icons:
 	$(info #### Generating Icons ####)
+	2goarray AppIconSmol icon < ./icon/app_icon_smol.png > ./icon/app_icon_smol.go
 	2goarray StatusPos icon < ./icon/status_pos.png > ./icon/icon_status_pos.go
 	2goarray StatusPosUp icon < ./icon/status_pos_up.png > ./icon/icon_status_pos_up.go
 	2goarray StatusPosDown icon < ./icon/status_pos_down.png > ./icon/icon_status_pos_down.go

@@ -23,6 +23,7 @@ Helium systray requires a JSON config file at `~/Documents/helium-systray.json`.
 ```
 {
   "refresh_minutes": 15,
-  "account_address": "{{ your helium account address here }}"
+  "account_addresses": ["{{ your helium account addresses here }}"],
+  "hotspot_addresses": ["{{ individual hotspot addresses here }}"],
 }
 ```

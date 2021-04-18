@@ -15,7 +15,8 @@ type sortOrder struct {
 }
 
 type config struct {
-	AccountAddress     string              // hotspot account address
+	AccountAddresses   []string            // hotspot account addresses
+	HotspotAddresses   []string            // individual hotspot addresses
 	RefreshMinutes     int                 // view refresh minutes
 	Total              float64             // total rewards to be displayed in the menu
 	SkipHotspotRefresh bool                // option to skip refresh for initial load
@@ -25,6 +26,76 @@ type config struct {
 	HsRewards          map[string][]reward // 60 day reward data of hotspots
 	HsMenuItems        []hotspotMenuItem   // slice of view rows
 	HsSort             []sortOrder         // sorting order
+}
+
+func (cfg *config) FetchAllHotspots() {
+	// Get hotspots from accounts
+	for _, addr := range cfg.AccountAddresses {
+		hotspotsResp, err := getAccountHotspots(addr)
+		if err != nil {
+			handleError(err, "Failed to fetch hotspots")
+		}
+
+		// populate hotspot data and menu items
+		for _, hs := range hotspotsResp.Data {
+			cfg.HsMap[hs.Name] = hs
+			cfg.HsMenuItems = append(cfg.HsMenuItems, newHotspotMenuItem(hs.Name))
+		}
+	}
+
+	// Get individual hotspots by address
+	for _, addr := range cfg.HotspotAddresses {
+		hotspotResp, err := getHotspot(addr)
+		if err != nil {
+			handleError(err, "Failed to fetch hotspot")
+		}
+
+		// populate hotspot data and menu items
+		hs := hotspotResp.Data
+		cfg.HsMap[hs.Name] = hs
+		cfg.HsMenuItems = append(cfg.HsMenuItems, newHotspotMenuItem(hs.Name))
+	}
+}
+
+func (cfg *config) GetHNTPrice() {
+	// Get new HNT price for conversion
+	priceResp, err := getPrice()
+	if err != nil {
+		msg := "Failed to get HNT price"
+		// Hard error on initial launch
+		if cfg.SkipHotspotRefresh {
+			handleError(err, msg)
+		} else {
+			handleSoftError(err, msg)
+		}
+	}
+	cfg.Price = priceResp.Data.Price
+}
+
+func (cfg *config) RefreshAllHotspots() {
+	if !cfg.SkipHotspotRefresh {
+		for _, hs := range cfg.HsMap {
+			resp, err := getHotspot(hs.Address)
+			if err != nil {
+				handleSoftError(err, "Failed to refresh hotspots")
+			}
+			cfg.HsMap[hs.Name] = resp.Data
+		}
+	}
+}
+
+func (cfg *config) GetHotspotRewards() {
+	// get rewards for each hotspot
+	for name, hs := range cfg.HsMap {
+		// track rewards
+		rewardsResp, _ := getHotspotRewards(hs.Address)
+		cfg.HsRewards[name] = rewardsResp.Data
+
+		// track sorting order and today's reward
+		reward := cfg.RewardOn(name, 0)
+		cfg.HsSort = append(cfg.HsSort, sortOrder{Name: name, Reward: reward})
+		cfg.Total += reward
+	}
 }
 
 func (cfg *config) SortHotspotsByReward() {
@@ -95,18 +166,19 @@ func (cfg *config) UpdateView() {
 	}
 
 	// update title with total
-	systray.SetTitle(fmt.Sprintf("Hotspot rewards: %s", cfg.rewardToString(cfg.Total)))
+	systray.SetTitle(cfg.rewardToString(cfg.Total))
 }
 
 func (cfg *config) ClearPreviousData() {
-	cfg.Total = 0.0
 	cfg.SkipHotspotRefresh = false
+	cfg.Total = 0.0
 	cfg.HsSort = []sortOrder{}
 }
 
 func newConfig(as appSettings) config {
 	return config{
-		AccountAddress:   as.AccountAddress,
+		AccountAddresses: as.AccountAddresses,
+		HotspotAddresses: as.HotspotAddresses,
 		RefreshMinutes:   as.RefreshMinutes,
 		HsMap:            make(map[string]hotspot),
 		HsRewards:        make(map[string][]reward),
