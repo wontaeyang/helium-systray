@@ -7,10 +7,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"reflect"
 	"runtime"
 	"time"
 
 	"github.com/getlantern/systray"
+	"github.com/pkg/browser"
 	"github.com/wontaeyang/helium-systray/icon"
 )
 
@@ -29,6 +31,7 @@ type hotspotMenuItem struct {
 	R24H     *systray.MenuItem
 	R07D     *systray.MenuItem
 	R30D     *systray.MenuItem
+	Explorer *systray.MenuItem
 }
 
 func main() {
@@ -75,6 +78,27 @@ func onReady() {
 		}
 	}()
 
+	// Sub menu item routine listening for explorer click
+	go func() {
+		var chans []chan struct{}
+		for _, mi := range cfg.HsMenuItems {
+			chans = append(chans, mi.Explorer.ClickedCh)
+		}
+
+		cases := make([]reflect.SelectCase, len(chans))
+		for i, ch := range chans {
+			cases[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ch)}
+		}
+		for {
+			chosen, _, ok := reflect.Select(cases)
+			if ok {
+				name := cfg.HsSort[chosen].Name
+				addr := cfg.HsMap[name].Address
+				browser.OpenURL(fmt.Sprintf("https://explorer.helium.com/hotspots/%s", addr))
+			}
+		}
+	}()
+
 	// click handling routine
 	go func() {
 		for {
@@ -86,10 +110,7 @@ func onReady() {
 				cfg.ConvertToDollars = true
 				cfg.UpdateView()
 			case <-editConfig.ClickedCh:
-
-				app := ""
-				filepath := ""
-
+				var app, filepath string
 				if runtime.GOOS == "windows" {
 					app = "explorer"
 					filepath = "file:///" + appSettingsFullPath()
@@ -97,16 +118,8 @@ func onReady() {
 					app = "open"
 					filepath = appSettingsFullPath()
 				}
-
 				cmd := exec.Command(app, filepath)
-				stdout, err := cmd.Output()
-
-				if err != nil {
-					fmt.Println(err.Error())
-					return
-				}
-
-				fmt.Print(string(stdout))
+				cmd.Output()
 			case <-mQuit.ClickedCh:
 				systray.Quit()
 				return
@@ -116,7 +129,8 @@ func onReady() {
 }
 
 func onExit() {
-	// no-op
+	fmt.Println("Requested to quit")
+	fmt.Println("Good bye :(")
 }
 
 func appSettingsFullPath() string {
@@ -159,11 +173,12 @@ func newHotspotMenuItem(name string) hotspotMenuItem {
 	item := systray.AddMenuItem(fmt.Sprintf("Loading %v", name), "")
 	return hotspotMenuItem{
 		MenuItem: item,
-		Status:   item.AddSubMenuItem("Loading...", "Loading data..."),
-		Scale:    item.AddSubMenuItem("Loading...", "Loading data..."),
-		R24H:     item.AddSubMenuItem("Loading...", "Loading data..."),
-		R07D:     item.AddSubMenuItem("Loading...", "Loading data..."),
-		R30D:     item.AddSubMenuItem("Loading...", "Loading data..."),
+		Status:   item.AddSubMenuItem("Loading...", "Online status"),
+		Scale:    item.AddSubMenuItem("Loading...", "Reward scale"),
+		R24H:     item.AddSubMenuItem("Loading...", "24 hour reward"),
+		R07D:     item.AddSubMenuItem("Loading...", "7 day reward"),
+		R30D:     item.AddSubMenuItem("Loading...", "30 day reward"),
+		Explorer: item.AddSubMenuItem("Loading...", "Open hotspot in Helium explorer"),
 	}
 }
 

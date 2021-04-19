@@ -36,7 +36,7 @@ func (cfg *config) FetchAllHotspots() {
 			handleError(err, "Failed to fetch hotspots")
 		}
 
-		// populate hotspot data and menu items
+		// Populate hotspot data and menu items
 		for _, hs := range hotspotsResp.Data {
 			cfg.HsMap[hs.Name] = hs
 			cfg.HsMenuItems = append(cfg.HsMenuItems, newHotspotMenuItem(hs.Name))
@@ -50,7 +50,7 @@ func (cfg *config) FetchAllHotspots() {
 			handleError(err, "Failed to fetch hotspot")
 		}
 
-		// populate hotspot data and menu items
+		// Populate hotspot data and menu items
 		hs := hotspotResp.Data
 		cfg.HsMap[hs.Name] = hs
 		cfg.HsMenuItems = append(cfg.HsMenuItems, newHotspotMenuItem(hs.Name))
@@ -85,13 +85,13 @@ func (cfg *config) RefreshAllHotspots() {
 }
 
 func (cfg *config) GetHotspotRewards() {
-	// get rewards for each hotspot
+	// Get rewards for each hotspot
 	for name, hs := range cfg.HsMap {
-		// track rewards
+		// Track rewards
 		rewardsResp, _ := getHotspotRewards(hs.Address)
 		cfg.HsRewards[name] = rewardsResp.Data
 
-		// track sorting order and today's reward
+		// Track sorting order and today's reward
 		reward := cfg.RewardOn(name, 0)
 		cfg.HsSort = append(cfg.HsSort, sortOrder{Name: name, Reward: reward})
 		cfg.Total += reward
@@ -141,12 +141,12 @@ func (cfg *config) UpdateView() {
 		onlineStatus := hs.Status.Online
 		scale := hs.RewardScale
 
-		// update status of each hotspot row
+		// Update status of each hotspot row
 		r24H, p24H, d24H := cfg.RewardDiff(order.Name, 1)
 		setStatus(cfg.HsMenuItems[i].MenuItem, onlineStatus, d24H)
 		cfg.HsMenuItems[i].MenuItem.SetTitle(fmt.Sprintf("%s - %s", cfg.rewardToString(r24H), order.Name))
 
-		// sub menu
+		// Populate sub-menu
 		cfg.HsMenuItems[i].Status.SetTitle(fmt.Sprintf("Status: %s", onlineStatus))
 		cfg.HsMenuItems[i].Scale.SetTitle(fmt.Sprintf("Reward scale: %s", floatToString(scale)))
 
@@ -163,6 +163,9 @@ func (cfg *config) UpdateView() {
 		r30D, p30D, d30D := cfg.RewardDiff(order.Name, 30)
 		setStatus(r30DRow, onlineStatus, d30D)
 		r30DRow.SetTitle(fmt.Sprintf("30D - %s %s", cfg.rewardToString(r30D), diffPercent(d30D, p30D)))
+
+		// Set button for opening hotspot in Helium explorer
+		cfg.HsMenuItems[i].Explorer.SetTitle("Open Helium explorer...")
 	}
 
 	// update title with total
