@@ -16,10 +16,12 @@ import (
 	"github.com/wontaeyang/helium-systray/icon"
 )
 
-const appSettingsPath = "/Documents/helium-systray.json"
+const (
+	appSettingsPath = "/Documents/helium-systray.json"
+	refreshMinutes  = 15
+)
 
 type appSettings struct {
-	RefreshMinutes   int      `json:"refresh_minutes"`
 	AccountAddresses []string `json:"account_addresses"`
 	HotspotAddresses []string `json:"hotspot_addresses"`
 }
@@ -74,7 +76,7 @@ func onReady() {
 			cfg.SortHotspotsByReward()
 			cfg.UpdateView()
 			cfg.SkipHotspotRefresh = false
-			time.Sleep(time.Duration(cfg.RefreshMinutes) * time.Minute)
+			time.Sleep(time.Duration(refreshMinutes) * time.Minute)
 		}
 	}()
 

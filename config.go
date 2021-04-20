@@ -18,7 +18,6 @@ type sortOrder struct {
 type config struct {
 	AccountAddresses   []string            // hotspot account addresses
 	HotspotAddresses   []string            // individual hotspot addresses
-	RefreshMinutes     int                 // view refresh minutes
 	Total              float64             // total rewards to be displayed in the menu
 	SkipHotspotRefresh bool                // option to skip refresh for initial load
 	ConvertToDollars   bool                // convert HNT to dollars
@@ -192,7 +191,6 @@ func newConfig(as appSettings) config {
 	return config{
 		AccountAddresses: as.AccountAddresses,
 		HotspotAddresses: as.HotspotAddresses,
-		RefreshMinutes:   as.RefreshMinutes,
 		HsMap:            make(map[string]hotspot),
 		HsRewards:        make(map[string][]reward),
 		HsMenuItems:      []hotspotMenuItem{},
