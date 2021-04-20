@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"time"
 
 	"github.com/getlantern/systray"
 	"github.com/wontaeyang/helium-systray/icon"
@@ -80,6 +81,7 @@ func (cfg *config) RefreshAllHotspots() {
 				handleSoftError(err, "Failed to refresh hotspots")
 			}
 			cfg.HsMap[hs.Name] = resp.Data
+			cfg.sleep()
 		}
 	}
 }
@@ -88,13 +90,18 @@ func (cfg *config) GetHotspotRewards() {
 	// Get rewards for each hotspot
 	for name, hs := range cfg.HsMap {
 		// Track rewards
-		rewardsResp, _ := getHotspotRewards(hs.Address)
-		cfg.HsRewards[name] = rewardsResp.Data
+		rewardsResp, err := getHotspotRewards(hs.Address)
+		if err != nil {
+			handleSoftError(err, "Failed to get rewards")
+		} else {
+			cfg.HsRewards[name] = rewardsResp.Data
+		}
 
 		// Track sorting order and today's reward
 		reward := cfg.RewardOn(name, 0)
 		cfg.HsSort = append(cfg.HsSort, sortOrder{Name: name, Reward: reward})
 		cfg.Total += reward
+		cfg.sleep()
 	}
 }
 
@@ -175,6 +182,10 @@ func (cfg *config) UpdateView() {
 func (cfg *config) ClearPreviousData() {
 	cfg.Total = 0.0
 	cfg.HsSort = []sortOrder{}
+}
+
+func (cfg *config) sleep() {
+	time.Sleep(time.Duration(10*len(cfg.HsMap)) * time.Millisecond)
 }
 
 func newConfig(as appSettings) config {
