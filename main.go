@@ -18,6 +18,7 @@ import (
 
 const (
 	appSettingsPath = "/Documents/helium-systray.json"
+	donationAccount = "14EfP4nSYnR2giUiv2yrAGhmMwdt9q8zFqW4STqSp3nsnVnPoiD"
 	refreshMinutes  = 15
 )
 
@@ -64,6 +65,8 @@ func onReady() {
 	displayHNT := pref.AddSubMenuItem("display rewards in HNT", "display rewards in HNT")
 	displayDollars := pref.AddSubMenuItem("display rewards in USD", "display rewards in USD")
 	editConfig := pref.AddSubMenuItem("Edit config...", "Edit the JSON config")
+
+	donate := systray.AddMenuItem("Support the project with HNT", "Like the app?")
 	mQuit := systray.AddMenuItem("Quit", "Quits this app")
 
 	// Data refresh routine
@@ -122,6 +125,8 @@ func onReady() {
 				}
 				cmd := exec.Command(app, filepath)
 				cmd.Output()
+			case <-donate.ClickedCh:
+				browser.OpenURL(fmt.Sprintf("https://explorer.helium.com/accounts/%s", donationAccount))
 			case <-mQuit.ClickedCh:
 				systray.Quit()
 				return

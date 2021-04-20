@@ -2,6 +2,7 @@
 A menu bar app for tracking Helium hotspot earnings. Powered by [systray](https://github.com/getlantern/systray).
 
 ![app preview](assets/app.png?raw=true)
+(Above example is a random account I found on Helium Explorer)
 
 ### Env setup
 - [Install Go](https://golang.org/doc/install)
