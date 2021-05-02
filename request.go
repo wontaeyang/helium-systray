@@ -9,8 +9,12 @@ import (
 	"time"
 )
 
+var httpClient = http.Client{
+	Timeout: httpTimeout * time.Second,
+}
+
 func requestGet(url string, model interface{}) error {
-	resp, err := http.Get(url)
+	resp, err := httpClient.Get(url)
 	if err != nil {
 		return err
 	}

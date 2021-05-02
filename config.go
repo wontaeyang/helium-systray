@@ -68,8 +68,9 @@ func (cfg *config) GetHNTPrice() {
 		} else {
 			handleSoftError(err, msg)
 		}
+	} else {
+		cfg.Price = priceResp.Data.Price
 	}
-	cfg.Price = priceResp.Data.Price
 }
 
 func (cfg *config) RefreshAllHotspots() {
@@ -78,6 +79,7 @@ func (cfg *config) RefreshAllHotspots() {
 			resp, err := getHotspot(hs.Address)
 			if err != nil {
 				handleSoftError(err, "Failed to refresh hotspots")
+				continue
 			}
 			cfg.HsMap[hs.Name] = resp.Data
 			cfg.sleep()
@@ -92,6 +94,7 @@ func (cfg *config) GetHotspotRewards() {
 		rewardsResp, err := getHotspotRewards(hs.Address)
 		if err != nil {
 			handleSoftError(err, "Failed to get rewards")
+			continue
 		} else {
 			cfg.HsRewards[name] = rewardsResp.Data
 		}

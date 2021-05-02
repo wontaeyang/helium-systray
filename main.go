@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -19,7 +20,8 @@ import (
 const (
 	appSettingsPath = "/Documents/helium-systray.json"
 	donationAccount = "14EfP4nSYnR2giUiv2yrAGhmMwdt9q8zFqW4STqSp3nsnVnPoiD"
-	refreshMinutes  = 15
+	refreshMinutes  = 15 // Minutes
+	httpTimeout     = 10 // Seconds
 )
 
 type appSettings struct {
@@ -42,20 +44,21 @@ func main() {
 }
 
 func onReady() {
+	// Set loading status
+	systray.SetIcon(icon.AppIconSmol)
+	setAppTitle("Loading config...")
+
 	// Load config file
 	appSettings, err := loadAppSettings(appSettingsPath)
 	if err != nil {
-		handleError(err, "Config error")
+		handleError(err, "")
 	}
 
 	fmt.Printf("app settings loaded: %+v \n", appSettings)
 
-	// Set loading status
-	systray.SetIcon(icon.AppIconSmol)
-	setAppTitle("Loading summary...")
-
 	// Setup initial config values
 	cfg := newConfig(appSettings)
+	setAppTitle("Loading summary...")
 	cfg.FetchAllHotspots()
 	cfg.SkipHotspotRefresh = true
 
@@ -154,23 +157,23 @@ func loadAppSettings(path string) (appSettings, error) {
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return as, err
+		return as, errors.New("Home dir not found")
 	}
 
 	file, err := os.Open(homeDir + path)
 	defer file.Close()
 	if err != nil {
-		return as, err
+		return as, errors.New("Config not found")
 	}
 
 	rawSettings, err := ioutil.ReadAll(file)
 	if err != nil {
-		return as, err
+		return as, errors.New("Config read failed")
 	}
 
 	err = json.Unmarshal(rawSettings, &as)
 	if err != nil {
-		return as, err
+		return as, errors.New("Invalid config JSON")
 	}
 
 	return as, nil
@@ -199,7 +202,12 @@ func handleSoftError(err error, msg string) {
 }
 
 func handleError(err error, msg string) {
-	systray.SetTitle(msg)
+	if msg != "" {
+		systray.SetTitle(msg)
+	} else {
+		systray.SetTitle(err.Error())
+	}
+
 	time.Sleep(3 * time.Second)
 	log.Fatalln(err)
 }
