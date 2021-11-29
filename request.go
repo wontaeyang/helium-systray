@@ -14,7 +14,15 @@ var httpClient = http.Client{
 }
 
 func requestGet(url string, model interface{}) error {
-	resp, err := httpClient.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+
+	// Helium API requires user agent to be set in requests
+	req.Header.Set("User-Agent", "Helium-Systray/1.0")
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return err
 	}

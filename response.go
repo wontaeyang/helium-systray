@@ -7,14 +7,18 @@ type hotspot struct {
 	Lat            float64   `json:"lat"`
 	TimestampAdded time.Time `json:"timestamp_added"`
 	Status         struct {
-		Online      string   `json:"online"`
-		ListenAddrs []string `json:"listen_addrs"`
-		Height      int      `json:"height"`
+		Timestamp   time.Time `json:"timestamp"`
+		Online      string    `json:"online"`
+		ListenAddrs []string  `json:"listen_addrs"`
+		Height      int       `json:"height"`
 	} `json:"status"`
 	RewardScale      float64 `json:"reward_scale"`
+	Payer            string  `json:"payer"`
 	Owner            string  `json:"owner"`
 	Nonce            int     `json:"nonce"`
 	Name             string  `json:"name"`
+	Mode             string  `json:"mode"`
+	LocationHex      string  `json:"location_hex"`
 	Location         string  `json:"location"`
 	LastPocChallenge int     `json:"last_poc_challenge"`
 	LastChangeBlock  int     `json:"last_change_block"`
@@ -29,6 +33,8 @@ type hotspot struct {
 		LongCity     string `json:"long_city"`
 		CityID       string `json:"city_id"`
 	} `json:"geocode"`
+	Gain       int    `json:"gain"`
+	Elevation  int    `json:"elevation"`
 	BlockAdded int    `json:"block_added"`
 	Block      int    `json:"block"`
 	Address    string `json:"address"`
